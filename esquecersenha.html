@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - MercadoJuda Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #22c55e;
+            --primary-hover: #16a34a;
+            --bg: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --error: #ef4444;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .reset-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); display: block; margin-bottom: 10px; }
+        h2 { color: var(--text-main); font-size: 1.4rem; font-weight: 800; }
+        p { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
+
+        .form-group { margin-bottom: 18px; position: relative; }
+        label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
+
+        .pass-container { position: relative; }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+        }
+
+        /* Botão Mostrar/Ocultar */
+        .toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 0.7rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            padding: 5px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        #msg {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error { background: #fef2f2; color: var(--error); border: 1px solid #fee2e2; }
+        .success { background: #f0fdf4; color: var(--primary-hover); border: 1px solid #dcfce7; }
+
+        .footer { text-align: center; margin-top: 25px; font-size: 0.9rem; }
+        .footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="reset-card">
+        <div class="header">
+            <span class="logo">🛒 MercadoJuda</span>
+            <h2>Redefinir Senha</h2>
+            <p>Campos com * são obrigatórios.</p>
+        </div>
+
+        <div id="msg"></div>
+
+        <form onsubmit="event.preventDefault(); redefinirSenha();">
+            <div class="form-group">
+                <label>Nome de Usuário *</label>
+                <input type="text" id="resetUser" placeholder="Seu usuário cadastrado" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nova Senha *</label>
+                <div class="pass-container">
+                    <input type="password" id="newPass" placeholder="Mínimo 6 caracteres" required minlength="6">
+                    <button type="button" class="toggle-btn" onclick="togglePass('newPass')">Mostrar</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Confirmar Nova Senha *</label>
+                <div class="pass-container">
+                    <input type="password" id="confirmNewPass" placeholder="Repita a nova senha" required>
+                    <button type="button" class="toggle-btn" onclick="togglePass('confirmNewPass')">Mostrar</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Atualizar Senha</button>
+        </form>
+
+        <div class="footer">
+            Lembrou a senha? <a href="login.html">Voltar para Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Função para mostrar/ocultar senha
+        function togglePass(id) {
+            const input = document.getElementById(id);
+            const btn = input.nextElementSibling;
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerText = "Ocultar";
+            } else {
+                input.type = "password";
+                btn.innerText = "Mostrar";
+            }
+        }
+
+        function redefinirSenha() {
+            const userDigitado = document.getElementById('resetUser').value.trim();
+            const novaSenha = document.getElementById('newPass').value;
+            const confirmaSenha = document.getElementById('confirmNewPass').value;
+            
+            const usuarioSalvo = JSON.parse(localStorage.getItem('user'));
+
+            if (!usuarioSalvo || usuarioSalvo.usuario !== userDigitado) {
+                exibirMsg("Usuário não encontrado em nossa base!", "error");
+                return;
+            }
+
+            if (novaSenha.length < 6) {
+                exibirMsg("A nova senha deve ter pelo menos 6 caracteres!", "error");
+                return;
+            }
+
+            if (novaSenha !== confirmaSenha) {
+                exibirMsg("As senhas novas não coincidem!", "error");
+                return;
+            }
+
+            // Atualiza o objeto mantendo as outras infos (como email) e trocando a senha
+            usuarioSalvo.senha = novaSenha;
+            localStorage.setItem('user', JSON.stringify(usuarioSalvo));
+
+            exibirMsg("✅ Senha alterada com sucesso! Redirecionando...", "success");
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        }
+
+        function exibirMsg(texto, tipo) {
+            const msgBox = document.getElementById('msg');
+            msgBox.innerText = texto;
+            msgBox.className = tipo;
+            msgBox.style.display = 'block';
+            
+            if(tipo === "error") {
+                setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Pro Stock - Gestão Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #f1f5f9;
+            --primary: #1e293b;
+            --accent: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --card: #ffffff;
+            --text: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
+
+        header { 
+            background: var(--primary); padding: 20px; color: white;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media (min-width: 900px) { .main-grid { grid-template-columns: 350px 1fr; } }
+
+        .card { background: var(--card); border-radius: 24px; padding: 25px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        h2 { font-weight: 800; margin-bottom: 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+
+        .input-group { margin-bottom: 15px; }
+        label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        input, select { 
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; 
+            outline: none; transition: 0.3s; font-size: 14px;
+        }
+        input:focus { border-color: var(--accent); }
+
+        /* Animação de Alerta Crítico */
+        @keyframes pulse-critical {
+            0% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0); }
+        }
+
+        .inventory-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 600px) { .inventory-list { grid-template-columns: 1fr 1fr; } }
+
+        .item-card { 
+            background: white; border-radius: 18px; padding: 15px; border: 1px solid #e2e8f0;
+            position: relative; transition: 0.3s; border-left: 5px solid var(--accent);
+        }
+        
+        .item-card.vencido { 
+            border-left-color: var(--danger) !important; 
+            background: #fff1f2 !important; 
+            animation: pulse-critical 1.5s infinite; 
+        }
+
+        .item-card.vencendo { border-left-color: var(--warning); }
+
+        .btn-del { 
+            position: absolute; top: 10px; right: 10px; background: #fee2e2; 
+            color: var(--danger); border: none; width: 28px; height: 28px; 
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+
+        .stock-control { 
+            display: flex; align-items: center; justify-content: space-between; 
+            margin-top: 15px; background: #f8fafc; padding: 10px; border-radius: 12px;
+        }
+        .stock-btn { width: 32px; height: 32px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }
+        .disabled-action { opacity: 0.3; pointer-events: none; }
+
+        .btn-wa { 
+            background: #22c55e; color: white; border: none; width: 100%; 
+            padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer;
+            margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        #imgPreview {
+            width: 100%; height: 100px; border-radius: 12px; background: #f1f5f9;
+            margin-bottom: 15px; border: 2px dashed #cbd5e1; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #imgPreview img { width: 100%; height: 100%; object-fit: contain; }
+        
+        .alert-box {
+            background: var(--danger); color: white; font-size: 9px; 
+            padding: 6px; border-radius: 8px; font-weight: 800; margin-top: 8px;
+            text-align: center; line-height: 1.2;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>LOGISTICA <b>TECH</b></div>
+    <div id="stats" style="font-size: 0.8rem; font-weight: 600;">ITENS: 0</div>
+</header>
+
+<div class="container">
+    <div class="main-grid">
+        
+        <div class="card">
+            <h2>✨ Novo Produto</h2>
+            <div id="imgPreview">
+                <img src="" id="previewImg" style="display:none">
+                <span id="previewLabel" style="font-size:12px; color:#94a3b8">Link da imagem</span>
+            </div>
+
+            <div class="input-group">
+                <label>Código (Últimos 6 dígitos)</label>
+                <input type="text" id="codigo" placeholder="Ex: 884021" maxlength="6">
+            </div>
+
+            <div class="input-group">
+                <label>Nome do Produto</label>
+                <input type="text" id="nome" placeholder="Ex: Carne Bovina" oninput="checarGarantia()">
+            </div>
+
+            <div class="input-group" style="display: flex; gap: 10px;">
+                <div style="flex:1">
+                    <label>Fabricação</label>
+                    <input type="date" id="fab">
+                </div>
+                <div style="flex:1">
+                    <label>Vencimento</label>
+                    <input type="date" id="venc">
+                </div>
+            </div>
+
+            <div class="input-group" style="display: flex; gap: 10px;">
+                <div style="flex:2">
+                    <label>Preço (R$)</label>
+                    <input type="text" id="preco" placeholder="25,00">
+                </div>
+                <div style="flex:1">
+                    <label>Qtd</label>
+                    <input type="number" id="qtd" value="1">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>URL da Imagem</label>
+                <input type="text" id="imagem" placeholder="http://..." oninput="preview()">
+            </div>
+
+            <button onclick="adicionar()" style="width:100%; padding:15px; background:var(--accent); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer">CADASTRAR NO ESTOQUE</button>
+            
+            <button onclick="window.location.href='index.html'" style="width:100%; background:none; border:none; margin-top:15px; color:#64748b; font-size:12px; cursor:pointer; font-weight: 600;">Ir para a Loja →</button>
+        </div>
+
+        <div>
+            <div class="card" style="margin-bottom: 25px;">
+                <h2>📊 Monitor de Estoque</h2>
+                <canvas id="chartStock" height="80"></canvas>
+                <button class="btn-wa" onclick="mandarWhats()">📲 Relatório para WhatsApp</button>
+            </div>
+            <div class="inventory-list" id="listaEstoque"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('custom_products')) || [];
+    let chart;
+
+    const categoriasGarantia = ["celular", "iphone", "geladeira", "tv", "notebook", "máquina", "airfryer", "fogão"];
+
+    function formatarData(data) {
+        if(!data || data === "N/A") return "N/A";
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    function statusProduto(dataVenc) {
+        if(!dataVenc || dataVenc === "N/A") return "ok";
+        const hoje = new Date();
+        hoje.setHours(0,0,0,0);
+        const venc = new Date(dataVenc);
+        
+        if (venc < hoje) return "vencido";
+        const diff = (venc - hoje) / (1000 * 60 * 60 * 24);
+        return diff <= 7 ? "vencendo" : "ok";
+    }
+
+    function preview() {
+        const url = document.getElementById('imagem').value;
+        const img = document.getElementById('previewImg');
+        const label = document.getElementById('previewLabel');
+        if(url) { img.src = url; img.style.display = 'block'; label.style.display = 'none'; }
+    }
+
+    function checarGarantia() {
+        const nome = document.getElementById('nome').value.toLowerCase();
+        return categoriasGarantia.some(c => nome.includes(c)) ? "12 Meses" : "Sem garantia";
+    }
+
+    function adicionar() {
+        const codigo = document.getElementById('codigo').value;
+        const nome = document.getElementById('nome').value;
+        const preco = document.getElementById('preco').value.replace(',','.');
+        const qtd = parseInt(document.getElementById('qtd').value);
+        const fab = document.getElementById('fab').value;
+        const venc = document.getElementById('venc').value;
+        const img = document.getElementById('imagem').value;
+
+        if(!nome || !preco || !img || !codigo) return alert("Erro: Código, Nome, Preço e Imagem são obrigatórios!");
+
+        const novo = {
+            id: Date.now(),
+            code: codigo,
+            name: nome,
+            price: parseFloat(preco),
+            q: qtd,
+            image: img,
+            fab: fab || "N/A",
+            venc: venc || "N/A",
+            warranty: checarGarantia()
+        };
+
+        db.unshift(novo);
+        salvar();
+        limpar();
+    }
+
+    function salvar() {
+        localStorage.setItem('custom_products', JSON.stringify(db));
+        render();
+    }
+
+    function limpar() {
+        document.getElementById('codigo').value = '';
+        document.getElementById('nome').value = '';
+        document.getElementById('preco').value = '';
+        document.getElementById('imagem').value = '';
+        document.getElementById('fab').value = '';
+        document.getElementById('venc').value = '';
+        document.getElementById('previewImg').style.display = 'none';
+        document.getElementById('previewLabel').style.display = 'block';
+    }
+
+    function render() {
+        const lista = document.getElementById('listaEstoque');
+        lista.innerHTML = "";
+        
+        db.forEach((p, i) => {
+            const status = statusProduto(p.venc);
+            const isVencido = status === "vencido";
+            const isVencendo = status === "vencendo";
+
+            lista.innerHTML += `
+                <div class="item-card ${isVencido ? 'vencido' : (isVencendo ? 'vencendo' : '')}">
+                    <button class="btn-del" onclick="remover(${i})">×</button>
+                    <div style="display:flex; gap:12px; align-items:center">
+                        <img src="${p.image}" style="width:60px; height:60px; border-radius:12px; object-fit:cover; ${isVencido ? 'filter: grayscale(1)' : ''}">
+                        <div>
+                            <span style="font-size:10px; font-weight:800; color:#64748b">CÓD: ${p.code}</span><br>
+                            <strong style="font-size:14px">${p.name}</strong><br>
+                            <div style="font-size:10px; color:#64748b; margin-top:2px">
+                                Val: <b style="${isVencido || isVencendo ? 'color:var(--danger)' : ''}">${formatarData(p.venc)}</b>
+                            </div>
+                            ${isVencido ? `
+                                <div class="alert-box">
+                                    ESTE PRODUTO VENCEU!<br>DESCARTE IMEDIATO PARA EVITAR RISCOS.
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="stock-control ${isVencido ? 'disabled-action' : ''}">
+                        <div style="font-weight:800; font-size:1.2rem">${p.q} <small style="font-size:10px">UNID</small></div>
+                        <div style="display:flex; gap:5px">
+                            <button class="stock-btn" style="background:#e2e8f0" onclick="mudarQtd(${i},-1)">-</button>
+                            <button class="stock-btn" style="background:var(--accent); color:white" onclick="mudarQtd(${i},1)">+</button>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px; font-weight:800; color:${isVencido ? '#94a3b8' : 'var(--accent)'}; font-size:14px">R$ ${p.price.toFixed(2)}</div>
+                </div>
+            `;
+        });
+        document.getElementById('stats').innerText = `ITENS: ${db.length}`;
+        updateChart();
+    }
+
+    function mudarQtd(index, val) {
+        if(db[index].q + val >= 0) { db[index].q += val; salvar(); }
+    }
+
+    function remover(index) {
+        if(confirm("Deseja excluir este item permanentemente?")) { db.splice(index, 1); salvar(); }
+    }
+
+    function updateChart() {
+        const nomes = db.map(p => p.name).slice(0, 6);
+        const valores = db.map(p => p.q).slice(0, 6);
+        if(chart) chart.destroy();
+        const ctx = document.getElementById('chartStock').getContext('2d');
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: nomes,
+                datasets: [{ label: 'Estoque', data: valores, backgroundColor: '#22c55e', borderRadius: 8 }]
+            },
+            options: { plugins: { legend: { display: false } } }
+        });
+    }
+
+    function mandarWhats() {
+        let texto = "*RELATÓRIO DE ESTOQUE - ALERTA DE SEGURANÇA*%0A%0A";
+        db.forEach(p => {
+            const st = statusProduto(p.venc);
+            const alerta = st === 'vencido' ? "🚨 VENCIDO (DESCARTAR)" : "✅ OK";
+            texto += `📦 *${p.name}* (Cód: ${p.code})%0AQtd: ${p.q}%0AStatus: ${alerta}%0A---%0A`;
+        });
+        window.open(`https://wa.me/?text=${texto}`);
+    }
+
+    render();
+</script>
+</body>
+</html>

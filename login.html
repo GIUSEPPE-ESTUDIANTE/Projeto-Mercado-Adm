@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SuperMarket Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #22c55e;
+            --primary-hover: #16a34a;
+            --bg: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; display: block; }
+        h2 { color: var(--text-main); margin-bottom: 8px; font-weight: 800; }
+        p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem; }
+
+        .input-group { text-align: left; margin-bottom: 16px; position: relative; }
+        label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+
+        .pass-container { position: relative; }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+        }
+
+        /* Botão Mostrar/Ocultar */
+        .toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 0.7rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            padding: 5px;
+        }
+
+        .forgot-link {
+            display: block;
+            text-align: right;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .footer-links { margin-top: 25px; font-size: 0.9rem; color: var(--text-muted); }
+        .footer-links a { color: var(--primary); text-decoration: none; font-weight: 700; }
+
+        #error-msg {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+            border: 1px solid #fee2e2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <span class="logo">🛒 MercadoJuda</span>
+        <h2>Bem-vindo!</h2>
+        <p>Faça login para continuar.</p>
+
+        <div id="error-msg"></div>
+        
+        <form onsubmit="event.preventDefault(); fazerLogin();">
+            <div class="input-group">
+                <label>Usuário *</label>
+                <input type="text" id="user" placeholder="Seu usuário" required>
+            </div>
+
+            <div class="input-group">
+                <label>Senha *</label>
+                <div class="pass-container">
+                    <input type="password" id="pass" placeholder="Sua senha" required>
+                    <button type="button" class="toggle-btn" onclick="togglePass()">Mostrar</button>
+                </div>
+                <a href="esquecersenha.html" class="forgot-link">Esqueceu a senha?</a>
+            </div>
+
+            <button type="submit" class="btn-login">Entrar na Loja</button>
+        </form>
+
+        <div class="footer-links">
+            Não tem uma conta? <a href="cadastro.html">Cadastre-se agora</a>
+        </div>
+    </div>
+
+    <script>
+        // Função Mostrar Senha
+        function togglePass() {
+            const input = document.getElementById('pass');
+            const btn = document.querySelector('.toggle-btn');
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerText = "Ocultar";
+            } else {
+                input.type = "password";
+                btn.innerText = "Mostrar";
+            }
+        }
+
+        function fazerLogin() {
+            // Pegamos o que o usuário digitou e removemos espaços extras com .trim()
+            const userIn = document.getElementById('user').value.trim();
+            const passIn = document.getElementById('pass').value.trim();
+            const errorMsg = document.getElementById('error-msg');
+
+            // Buscamos os dados salvos no cadastro
+            const usuarioCadastrado = JSON.parse(localStorage.getItem('user'));
+
+            // DEBUG: Se quiser ver no console o que está salvo, remova o comentário abaixo:
+            // console.log("Salvo no sistema:", usuarioCadastrado);
+
+            // Verificação Reforçada
+            if (usuarioCadastrado) {
+                // Checa se o usuário digitado bate com o campo 'usuario' do objeto salvo
+                if (usuarioCadastrado.usuario === userIn && usuarioCadastrado.senha === passIn) {
+                    localStorage.setItem('logged', 'true');
+                    window.location.href = 'index.html';
+                } else {
+                    mostrarErro("Usuário ou senha incorretos!");
+                }
+            } else {
+                mostrarErro("Nenhum usuário cadastrado neste dispositivo!");
+            }
+        }
+
+        function mostrarErro(texto) {
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.innerText = texto;
+            errorMsg.style.display = 'block';
+            setTimeout(() => { errorMsg.style.display = 'none'; }, 3000);
+        }
+    </script>
+</body>
+</html>

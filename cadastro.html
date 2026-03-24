@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - SuperMarket Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* ====== VARIÁVEIS DE DESIGN ====== */
+        :root {
+            --primary: #22c55e;
+            --primary-hover: #16a34a;
+            --bg: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --error: #ef4444;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .register-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 480px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); display: block; margin-bottom: 10px; }
+        h2 { color: var(--text-main); font-size: 1.5rem; font-weight: 800; }
+        p { color: var(--text-muted); font-size: 0.95rem; margin-top: 5px; }
+
+        .form-group { margin-bottom: 18px; position: relative; }
+        label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; margin-left: 4px; }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+        }
+
+        .pass-container { position: relative; }
+        .toggle-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            padding: 5px;
+            text-transform: uppercase;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        #error-box {
+            background: #fef2f2;
+            color: var(--error);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #fee2e2;
+        }
+
+        .footer { text-align: center; margin-top: 25px; font-size: 0.95rem; color: var(--text-muted); }
+        .footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
+
+        /* ====== MODAL DE SUCESSO ====== */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .success-card {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+            transform: scale(0.5);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .success-card.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .check-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+            animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-card">
+        <div class="header">
+            <span class="logo">🛒 MercadoJuda</span>
+            <h2>Crie sua conta</h2>
+            <p>Os campos com * são obrigatórios.</p>
+        </div>
+
+        <div id="error-box"></div>
+
+        <form onsubmit="event.preventDefault(); processarCadastro();">
+            <div class="form-group">
+                <label>Nome Completo *</label>
+                <input type="text" id="regNome" placeholder="Seu nome aqui" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nome de Usuário *</label>
+                <input type="text" id="regUser" placeholder="Ex: joao_vitor" required>
+            </div>
+
+            <div class="form-group">
+                <label>E-mail *</label>
+                <input type="email" id="regEmail" placeholder="exemplo@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Senha *</label>
+                <div class="pass-container">
+                    <input type="password" id="regPass" placeholder="Mínimo 6 dígitos" required minlength="6">
+                    <button type="button" class="toggle-btn" onclick="togglePass('regPass')">Mostrar</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Confirmar Senha *</label>
+                <div class="pass-container">
+                    <input type="password" id="regConfirm" placeholder="Repita a senha" required>
+                    <button type="button" class="toggle-btn" onclick="togglePass('regConfirm')">Mostrar</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Finalizar Cadastro</button>
+        </form>
+
+        <div class="footer">
+            Já tem uma conta? <a href="login.html">Fazer Login</a>
+        </div>
+    </div>
+
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-card" id="successCard">
+            <div class="check-icon">✓</div>
+            <h2 style="margin-bottom: 10px;">Sucesso!</h2>
+            <p style="color: var(--text-muted);">Sua conta foi criada. <br> Indo para o Login...</p>
+        </div>
+    </div>
+
+    <script>
+        function togglePass(id) {
+            const field = document.getElementById(id);
+            const btn = field.nextElementSibling;
+            if (field.type === "password") {
+                field.type = "text";
+                btn.innerText = "Ocultar";
+            } else {
+                field.type = "password";
+                btn.innerText = "Mostrar";
+            }
+        }
+
+        function processarCadastro() {
+            const user = document.getElementById('regUser').value.trim();
+            const senha = document.getElementById('regPass').value;
+            const confirma = document.getElementById('regConfirm').value;
+            const errorBox = document.getElementById('error-box');
+
+            errorBox.style.display = 'none';
+
+            if (senha !== confirma) {
+                mostrarErro("As senhas não coincidem!");
+                return;
+            }
+
+            // SALVAMENTO SINCRONIZADO COM O LOGIN
+            const usuarioDados = {
+                usuario: user,
+                senha: senha
+            };
+
+            localStorage.setItem('user', JSON.stringify(usuarioDados));
+            localStorage.setItem('logged', 'false');
+
+            // DISPARAR ANIMAÇÃO DE SUCESSO
+            const overlay = document.getElementById('successOverlay');
+            const card = document.getElementById('successCard');
+
+            overlay.style.display = 'flex';
+            
+            // Força o reflow para a transição de entrada funcionar
+            setTimeout(() => {
+                card.classList.add('show');
+            }, 10);
+
+            // Redireciona para o login após 2.5 segundos
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2500);
+        }
+
+        function mostrarErro(msg) {
+            const errorBox = document.getElementById('error-box');
+            errorBox.innerText = msg;
+            errorBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
