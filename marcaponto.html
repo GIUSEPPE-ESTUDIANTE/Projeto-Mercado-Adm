@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplicativo de Ponto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00f2ff;
+      --primary-glow: rgba(0, 242, 255, 0.15);
+      --bg-dark: #08080a;
+      --card-bg: #111114;
+      --input-bg: #1a1a1e;
+      --text-main: #ffffff;
+      --text-dim: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; transition: all 0.2s ease; }
+
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 0% 0%, #00f2ff0a 0%, transparent 35%),
+        radial-gradient(circle at 100% 100%, #00f2ff0a 0%, transparent 35%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card-bg);
+      padding: 40px 30px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    h2 { font-size: 1.75rem; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.025em; }
+    .subtitle { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 32px; }
+
+    .input-group { margin-bottom: 20px; position: relative; }
+    label { display: block; font-size: 0.75rem; color: var(--primary); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--input-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #202025;
+      box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+
+    /* Ícone de Mostrar Senha */
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 38px;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      user-select: none;
+      background: rgba(255,255,255,0.05);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .toggle-password:hover { color: var(--primary); }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn-main { background: var(--primary); color: #020617; margin-top: 10px; }
+    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0, 242, 255, 0.4); }
+
+    .btn-secondary { background: transparent; color: var(--text-dim); border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 12px; }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+
+    .grid-ponto {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .btn-ponto {
+      font-size: 0.8rem;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-ponto:hover { border-color: var(--primary); background: rgba(0, 242, 255, 0.05); }
+
+    .info-card {
+      background: linear-gradient(145deg, #1a1a1e, #141417);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .table-container {
+      margin-top: 20px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 16px;
+      padding: 15px;
+      overflow-x: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 400px; }
+    th { text-align: left; color: var(--text-dim); padding-bottom: 12px; }
+    td { padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    .status-msg {
+      background: var(--primary-glow);
+      color: var(--primary);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      text-align: center;
+      margin: 15px 0;
+      border: 1px solid rgba(0, 242, 255, 0.2);
+    }
+
+    .hidden { display: none; }
+    .footer-links { margin-top: 24px; text-align: center; font-size: 0.9rem; color: var(--text-dim); }
+    .footer-links span { color: var(--primary); cursor: pointer; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <div id="login-screen">
+      <h2>Acessar Sistema</h2>
+      <p class="subtitle">Bem-vindo à HoraCerta. Identifique-se.</p>
+      
+      <div class="input-group">
+        <label>E-mail Institucional</label>
+        <input type="email" id="login-email" placeholder="nome@horacerta.com">
+      </div>
+      
+      <div class="input-group">
+        <label>Senha de Acesso</label>
+        <input type="password" id="login-senha" placeholder="Sua senha secreta">
+        <span class="toggle-password" onclick="togglePass('login-senha')">Ver</span>
+      </div>
+
+      <button class="btn-main" onclick="loginFuncionario()">Entrar no Painel</button>
+      
+      <div class="footer-links">
+        Ainda não tem conta? <span onclick="mostrarTela('cadastro-screen')">Criar agora</span>
+        <button onclick="window.location.href='index.html'" style="width:100%;margin-top:15px; color:#64748b; font-size:12px; cursor:pointer; font-weight: 600;">Ir para a Loja →</button>
+      </div>
+    </div>
+
+    <div id="cadastro-screen" class="hidden">
+      <h2>Novo Cadastro</h2>
+      <p class="subtitle">Crie suas credenciais de acesso.</p>
+      
+      <div class="input-group">
+        <label>Nome Completo</label>
+        <input type="text" id="cad-nome" placeholder="Ex: João Silva">
+      </div>
+
+      <div class="input-group">
+        <label>E-mail</label>
+        <input type="email" id="cad-email" placeholder="seu@email.com">
+      </div>
+
+      <div class="input-group">
+        <label>Criar Senha</label>
+        <input type="password" id="cad-senha" placeholder="Mínimo 6 dígitos">
+        <span class="toggle-password" onclick="togglePass('cad-senha')">Ver</span>
+      </div>
+      
+      <div class="input-group">
+        <label>Sua Função</label>
+        <select id="cad-cargo">
+          <option value="">Selecione seu cargo...</option>
+          <option value="Gerente">Gerente</option>
+          <option value="Supervisor">Supervisor</option>
+          <option value="Atendente">Atendente</option>
+          <option value="Balconista">Balconista</option>
+          <option value="Jovem Aprendiz">Jovem Aprendiz</option>
+        </select>
+      </div>
+
+      <button class="btn-main" onclick="cadastrarFuncionario()">Finalizar Cadastro</button>
+      <button class="btn-secondary" onclick="mostrarTela('login-screen')">Voltar ao Início</button>
+    </div>
+
+    <div id="painel-screen" class="hidden">
+      <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <h2 id="nome-func" style="font-size: 1.4rem; margin:0">Nome</h2>
+          <span id="cargo-func" style="color: var(--primary); font-size: 0.85rem; font-weight: 600;">Cargo</span>
+        </div>
+        <div style="text-align: right;">
+          <small style="color: var(--text-dim); display: block; font-size: 0.65rem;">CBO OFICIAL</small>
+          <code id="cbo-func" style="color: white; font-size: 0.8rem; background: #000; padding: 2px 6px; border-radius: 4px;">0000-00</code>
+        </div>
+      </header>
+
+      <div class="info-card">
+        <label style="margin-bottom: 4px; display: block;">Escopo da Função</label>
+        <p id="cargo-descricao" style="margin: 0; font-size: 0.85rem; color: var(--text-dim); line-height: 1.5;"></p>
+      </div>
+
+      <label>Registros Rápidos</label>
+      <div class="grid-ponto">
+        <button class="btn-ponto" onclick="registrar('entrada')">
+          <b style="color: var(--success)">ENTRADA</b>
+          <small>Início de turno</small>
+        </button>
+        <button class="btn-ponto" onclick="registrar('saida')">
+          <b style="color: var(--danger)">SAÍDA</b>
+          <small>Fim de turno</small>
+        </button>
+        <button class="btn-ponto" onclick="registrar('iniIntervalo')">
+          <b style="color: var(--warning)">INÍCIO PAUSA</b>
+          <small>Almoço/Café</small>
+        </button>
+        <button class="btn-ponto" onclick="registrar('fimIntervalo')">
+          <b style="color: var(--warning)">FIM PAUSA</b>
+          <small>Retorno</small>
+        </button>
+      </div>
+
+      <div id="ponto-status" class="status-msg hidden"></div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Ent.</th>
+              <th>Pausa</th>
+              <th>Ret.</th>
+              <th>Saí.</th>
+            </tr>
+          </thead>
+          <tbody id="lista-pontos"></tbody>
+        </table>
+      </div>
+
+      <button class="btn-secondary" style="margin-top: 30px;" onclick="sair()">Sair do Sistema</button>
+    </div>
+
+  </div>
+
+  <script>
+    const cboData = {
+      "Gerente": { cbo: "1421-05", desc: "Gestão estratégica, administrativa e liderança da unidade HoraCerta." },
+      "Supervisor": { cbo: "4101-05", desc: "Supervisão de equipes operacionais e garantia dos padrões de serviço." },
+      "Atendente": { cbo: "4221-05", desc: "Atendimento primário, recepção de alunos e controle de acesso." },
+      "Balconista": { cbo: "5211-25", desc: "Vendas diretas, suporte ao cliente e organização de PDV." },
+      "Jovem Aprendiz": { cbo: "4110-10", desc: "Auxílio em rotinas administrativas e suporte ao fluxo operacional." }
+    };
+
+    // Função para mostrar/esconder senha
+    function togglePass(id) {
+      const input = document.getElementById(id);
+      const btn = input.nextElementSibling;
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "Ocultar";
+      } else {
+        input.type = "password";
+        btn.textContent = "Ver";
+      }
+    }
+
+    function mostrarTela(tela) {
+      document.querySelectorAll(".app-container > div").forEach(div => div.classList.add("hidden"));
+      document.getElementById(tela).classList.remove("hidden");
+    }
+
+    function cadastrarFuncionario() {
+      const nome = document.getElementById("cad-nome").value;
+      const email = document.getElementById("cad-email").value;
+      const senha = document.getElementById("cad-senha").value;
+      const cargo = document.getElementById("cad-cargo").value;
+
+      if (!nome || !email || !senha || !cargo) {
+        alert("Ops! Todos os campos são obrigatórios para o cadastro.");
+        return;
+      }
+
+      localStorage.setItem(email, JSON.stringify({ nome, email, senha, cargo, pontos: [] }));
+      alert("Sucesso! Sua conta foi criada.");
+      mostrarTela("login-screen");
+    }
+
+    let usuarioAtual = null;
+
+    function loginFuncionario() {
+      const email = document.getElementById("login-email").value;
+      const senha = document.getElementById("login-senha").value;
+      const dados = localStorage.getItem(email);
+
+      if (!dados) {
+        alert("E-mail não encontrado. Verifique se digitou corretamente.");
+        return;
+      }
+
+      const funcionario = JSON.parse(dados);
+      if (senha !== funcionario.senha) {
+        alert("Senha incorreta. Clique em 'Ver' para conferir o que digitou.");
+        return;
+      }
+
+      usuarioAtual = email;
+      document.getElementById("nome-func").textContent = funcionario.nome;
+      document.getElementById("cargo-func").textContent = funcionario.cargo;
+      document.getElementById("cbo-func").textContent = cboData[funcionario.cargo].cbo;
+      document.getElementById("cargo-descricao").textContent = cboData[funcionario.cargo].desc;
+      atualizarTabela(funcionario.pontos);
+      mostrarTela("painel-screen");
+    }
+
+    function registrar(tipo) {
+      if (!usuarioAtual) return;
+      const funcionario = JSON.parse(localStorage.getItem(usuarioAtual));
+      const hoje = new Date().toLocaleDateString();
+      const hora = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+      let registro = funcionario.pontos.find(p => p.data === hoje);
+      if (!registro) {
+        registro = { data: hoje, entrada: "", iniIntervalo: "", fimIntervalo: "", saida: "" };
+        funcionario.pontos.unshift(registro);
+      }
+
+      registro[tipo] = hora;
+      localStorage.setItem(usuarioAtual, JSON.stringify(funcionario));
+      
+      const statusEl = document.getElementById("ponto-status");
+      statusEl.textContent = `Registro de ${tipo.toUpperCase()} feito às ${hora}`;
+      statusEl.classList.remove("hidden");
+      setTimeout(() => statusEl.classList.add("hidden"), 3000);
+      
+      atualizarTabela(funcionario.pontos);
+    }
+
+    function atualizarTabela(pontos) {
+      const tbody = document.getElementById("lista-pontos");
+      tbody.innerHTML = "";
+      pontos.slice(0, 5).forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${p.data.substring(0, 5)}</td>
+          <td style="color: var(--success)">${p.entrada || '--'}</td>
+          <td style="color: var(--warning)">${p.iniIntervalo || '--'}</td>
+          <td style="color: var(--warning)">${p.fimIntervalo || '--'}</td>
+          <td style="color: var(--danger)">${p.saida || '--'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function sair() {
+      usuarioAtual = null;
+      mostrarTela("login-screen");
+    }
+  </script>
+</body>
+</html>
